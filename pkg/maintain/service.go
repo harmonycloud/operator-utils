@@ -59,7 +59,7 @@ func UpdateServiceSelectorWithArray(conditions []map[string]interface{},
 			err = UpdateServiceSelector(clientset, namespace, name, podName.(string), podType.(string))
 		} else {
 			// 状态异常，直接设置pod为空，不选任何pod
-			//err = UpdateServiceSelector(clientset, namespace, name, "", podType.(string))
+			err = UpdateServiceSelector(clientset, namespace, name, "", podType.(string))
 		}
 		if err != nil {
 			return err
@@ -83,9 +83,9 @@ func UpdateServiceSelector(clientset clientset.Interface,
 
 	var labelSelector labels.Selector
 	labelSelector = labels.SelectorFromSet(labels.Set(
-		map[string]string{LABEL_MIDD: name, LABEL_AUTO_CHANGE: "true"}))
+		map[string]string{LABEL_APP: name}))
 
-	services, err := clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: labelSelector.String()})
+	services, err := clientset.CoreV1().Services(namespace).List(context.TODO(),metav1.ListOptions{LabelSelector: labelSelector.String()})
 	if err != nil {
 		return err
 	}
@@ -107,9 +107,9 @@ func UpdateServiceSelector(clientset clientset.Interface,
 
 		if isMatch {
 			if service.Spec.Selector[LABEL_STS_POD] != selectPodName {
-				klog.Infof("change %s svc selector to %v", name, selectPodName)
+				klog.Infof("change [%s] svc selector to [%v]", name, selectPodName)
 				service.Spec.Selector[LABEL_STS_POD] = selectPodName
-				_, err := clientset.CoreV1().Services(namespace).Update(context.TODO(), &service, metav1.UpdateOptions{})
+				_, err := clientset.CoreV1().Services(namespace).Update(context.TODO(),&service, metav1.UpdateOptions{})
 				if err != nil {
 					return err
 				}
@@ -119,14 +119,14 @@ func UpdateServiceSelector(clientset clientset.Interface,
 	return nil
 }
 
-
-func MergeLabel(curLabel,oldLabel map[string]string)map[string]string{
-	for k,v := range curLabel{
+func MergeLabel(curLabel, oldLabel map[string]string) map[string]string {
+	for k, v := range curLabel {
 		oldLabel[k] = v
 	}
 	return oldLabel
 }
 
-func AddAutoChangeLabelsSvc(curLabel map[string]string,name string, svcType string)map[string]string{
-	return MergeLabel(curLabel,map[string]string{LABEL_APP: name, LABEL_TYPE: string(svcType)})
+func AddAutoChangeLabelsSvc(curLabel map[string]string, name string, svcType string) map[string]string {
+	return MergeLabel(curLabel, map[string]string{LABEL_APP: name, LABEL_TYPE: string(svcType)})
+
 }
