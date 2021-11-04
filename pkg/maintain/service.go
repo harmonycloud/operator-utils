@@ -1,12 +1,14 @@
-package util
+package maintain
 
 import (
 	"context"
+	"strings"
+
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
-	"strings"
 )
 
 const (
@@ -85,7 +87,7 @@ func UpdateServiceSelector(clientset clientset.Interface,
 	labelSelector = labels.SelectorFromSet(labels.Set(
 		map[string]string{LABEL_APP: name}))
 
-	services, err := clientset.CoreV1().Services(namespace).List(context.TODO(),metav1.ListOptions{LabelSelector: labelSelector.String()})
+	services, err := clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: labelSelector.String()})
 	if err != nil {
 		return err
 	}
@@ -109,7 +111,7 @@ func UpdateServiceSelector(clientset clientset.Interface,
 			if service.Spec.Selector[LABEL_STS_POD] != selectPodName {
 				klog.Infof("change [%s] svc selector to [%v]", name, selectPodName)
 				service.Spec.Selector[LABEL_STS_POD] = selectPodName
-				_, err := clientset.CoreV1().Services(namespace).Update(context.TODO(),&service, metav1.UpdateOptions{})
+				_, err := clientset.CoreV1().Services(namespace).Update(context.TODO(), &service, metav1.UpdateOptions{})
 				if err != nil {
 					return err
 				}
@@ -128,5 +130,20 @@ func MergeLabel(curLabel, oldLabel map[string]string) map[string]string {
 
 func AddAutoChangeLabelsSvc(curLabel map[string]string, name string, svcType string) map[string]string {
 	return MergeLabel(curLabel, map[string]string{LABEL_APP: name, LABEL_TYPE: string(svcType)})
+}
 
+func VerifyService(svc *v1.Service) bool {
+	if svc == nil {
+		return false
+	}
+
+	_, exist := svc.Labels[LABEL_APP]
+	if !exist {
+		return false
+	}
+	_, exist = svc.Labels[LABEL_TYPE]
+	if !exist {
+		return false
+	}
+	return true
 }
