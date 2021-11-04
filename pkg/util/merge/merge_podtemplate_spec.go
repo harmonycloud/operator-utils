@@ -16,9 +16,9 @@ func PodTemplateSpecs(original, override corev1.PodTemplateSpec) corev1.PodTempl
 	merged.Spec.Containers = Containers(original.Spec.Containers, override.Spec.Containers)
 	merged.Spec.InitContainers = Containers(original.Spec.InitContainers, override.Spec.InitContainers)
 
-	if override.Spec.EphemeralContainers != nil {
-		merged.Spec.EphemeralContainers = EphemeralContainers(original.Spec.EphemeralContainers, override.Spec.EphemeralContainers)
-	}
+	//if override.Spec.EphemeralContainers != nil {
+	//	merged.Spec.EphemeralContainers = EphemeralContainers(original.Spec.EphemeralContainers, override.Spec.EphemeralContainers)
+	//}
 
 	if override.Spec.RestartPolicy != "" {
 		merged.Spec.RestartPolicy = override.Spec.RestartPolicy
@@ -119,65 +119,66 @@ func PodTemplateSpecs(original, override corev1.PodTemplateSpec) corev1.PodTempl
 		merged.Spec.EnableServiceLinks = override.Spec.EnableServiceLinks
 	}
 
-	if override.Spec.PreemptionPolicy != nil {
-		merged.Spec.PreemptionPolicy = override.Spec.PreemptionPolicy
-	}
-
-	if override.Spec.Overhead != nil {
-		merged.Spec.Overhead = override.Spec.Overhead
-	}
-
-	if override.Spec.TopologySpreadConstraints != nil {
-		merged.Spec.TopologySpreadConstraints = TopologySpreadConstraints(original.Spec.TopologySpreadConstraints, override.Spec.TopologySpreadConstraints)
-	}
+	//if override.Spec.PreemptionPolicy != nil {
+	//	merged.Spec.PreemptionPolicy = override.Spec.PreemptionPolicy
+	//}
+	//
+	//if override.Spec.Overhead != nil {
+	//	merged.Spec.Overhead = override.Spec.Overhead
+	//}
+	//
+	//if override.Spec.TopologySpreadConstraints != nil {
+	//	merged.Spec.TopologySpreadConstraints = TopologySpreadConstraints(original.Spec.TopologySpreadConstraints, override.Spec.TopologySpreadConstraints)
+	//}
 
 	return merged
 }
 
-func TopologySpreadConstraints(original, override []corev1.TopologySpreadConstraint) []corev1.TopologySpreadConstraint {
-	originalMap := createTopologySpreadConstraintMap(original)
-	overrideMap := createTopologySpreadConstraintMap(override)
+//
+//func TopologySpreadConstraints(original, override []corev1.TopologySpreadConstraint) []corev1.TopologySpreadConstraint {
+//	originalMap := createTopologySpreadConstraintMap(original)
+//	overrideMap := createTopologySpreadConstraintMap(override)
+//
+//	mergedMap := map[string]corev1.TopologySpreadConstraint{}
+//
+//	for k, v := range originalMap {
+//		mergedMap[k] = v
+//	}
+//	for k, v := range overrideMap {
+//		if originalValue, ok := mergedMap[k]; ok {
+//			mergedMap[k] = TopologySpreadConstraint(originalValue, v)
+//		} else {
+//			mergedMap[k] = v
+//		}
+//	}
+//	var mergedElements []corev1.TopologySpreadConstraint
+//	for _, v := range mergedMap {
+//		mergedElements = append(mergedElements, v)
+//	}
+//	return mergedElements
+//}
 
-	mergedMap := map[string]corev1.TopologySpreadConstraint{}
+//func TopologySpreadConstraint(original, override corev1.TopologySpreadConstraint) corev1.TopologySpreadConstraint {
+//	merged := original
+//	if override.LabelSelector != nil {
+//		merged.LabelSelector = override.LabelSelector
+//	}
+//	if override.MaxSkew != 0 {
+//		merged.MaxSkew = override.MaxSkew
+//	}
+//	if override.WhenUnsatisfiable != "" {
+//		merged.WhenUnsatisfiable = override.WhenUnsatisfiable
+//	}
+//	return merged
+//}
 
-	for k, v := range originalMap {
-		mergedMap[k] = v
-	}
-	for k, v := range overrideMap {
-		if originalValue, ok := mergedMap[k]; ok {
-			mergedMap[k] = TopologySpreadConstraint(originalValue, v)
-		} else {
-			mergedMap[k] = v
-		}
-	}
-	var mergedElements []corev1.TopologySpreadConstraint
-	for _, v := range mergedMap {
-		mergedElements = append(mergedElements, v)
-	}
-	return mergedElements
-}
-
-func TopologySpreadConstraint(original, override corev1.TopologySpreadConstraint) corev1.TopologySpreadConstraint {
-	merged := original
-	if override.LabelSelector != nil {
-		merged.LabelSelector = override.LabelSelector
-	}
-	if override.MaxSkew != 0 {
-		merged.MaxSkew = override.MaxSkew
-	}
-	if override.WhenUnsatisfiable != "" {
-		merged.WhenUnsatisfiable = override.WhenUnsatisfiable
-	}
-	return merged
-}
-
-func createTopologySpreadConstraintMap(constraints []corev1.TopologySpreadConstraint) map[string]corev1.TopologySpreadConstraint {
-	m := make(map[string]corev1.TopologySpreadConstraint)
-	for _, v := range constraints {
-		m[v.TopologyKey] = v
-	}
-	return m
-}
+//func createTopologySpreadConstraintMap(constraints []corev1.TopologySpreadConstraint) map[string]corev1.TopologySpreadConstraint {
+//	m := make(map[string]corev1.TopologySpreadConstraint)
+//	for _, v := range constraints {
+//		m[v.TopologyKey] = v
+//	}
+//	return m
+//}
 
 // HostAliases merges two slices of HostAliases together. Any shared hostnames with a given
 // ip are merged together into fewer entries.

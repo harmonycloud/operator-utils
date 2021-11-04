@@ -1,7 +1,6 @@
 package maintain
 
 import (
-	"context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	clientset "k8s.io/client-go/kubernetes"
@@ -85,7 +84,7 @@ func UpdateServiceSelector(clientset clientset.Interface,
 	labelSelector = labels.SelectorFromSet(labels.Set(
 		map[string]string{LABEL_APP: name}))
 
-	services, err := clientset.CoreV1().Services(namespace).List(context.TODO(),metav1.ListOptions{LabelSelector: labelSelector.String()})
+	services, err := clientset.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector.String()})
 	if err != nil {
 		return err
 	}
@@ -109,7 +108,7 @@ func UpdateServiceSelector(clientset clientset.Interface,
 			if service.Spec.Selector[LABEL_STS_POD] != selectPodName {
 				klog.Infof("change [%s] svc selector to [%v]", name, selectPodName)
 				service.Spec.Selector[LABEL_STS_POD] = selectPodName
-				_, err := clientset.CoreV1().Services(namespace).Update(context.TODO(),&service, metav1.UpdateOptions{})
+				_, err := clientset.CoreV1().Services(namespace).Update(&service)
 				if err != nil {
 					return err
 				}

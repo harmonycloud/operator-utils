@@ -111,7 +111,7 @@ func Container(defaultContainer, overrideContainer corev1.Container) corev1.Cont
 	merged.VolumeDevices = VolumeDevices(defaultContainer.VolumeDevices, overrideContainer.VolumeDevices)
 	merged.LivenessProbe = Probe(defaultContainer.LivenessProbe, overrideContainer.LivenessProbe)
 	merged.ReadinessProbe = Probe(defaultContainer.ReadinessProbe, overrideContainer.ReadinessProbe)
-	merged.StartupProbe = Probe(defaultContainer.StartupProbe, overrideContainer.StartupProbe)
+	//merged.StartupProbe = Probe(defaultContainer.StartupProbe, overrideContainer.StartupProbe)
 	merged.Lifecycle = LifeCycle(defaultContainer.Lifecycle, overrideContainer.Lifecycle)
 
 	if overrideContainer.TerminationMessagePath != "" {
@@ -222,9 +222,9 @@ func SecurityContext(original, override *corev1.SecurityContext) *corev1.Securit
 		merged.SELinuxOptions = override.SELinuxOptions
 	}
 
-	if override.WindowsOptions != nil {
-		merged.WindowsOptions = override.WindowsOptions
-	}
+	//if override.WindowsOptions != nil {
+	//	merged.WindowsOptions = override.WindowsOptions
+	//}
 	if override.RunAsUser != nil {
 		merged.RunAsUser = override.RunAsUser
 	}
@@ -488,9 +488,9 @@ func VolumeMount(original, override corev1.VolumeMount) corev1.VolumeMount {
 		merged.MountPropagation = override.MountPropagation
 	}
 
-	if override.SubPathExpr != "" {
-		merged.SubPathExpr = override.SubPathExpr
-	}
+	//if override.SubPathExpr != "" {
+	//	merged.SubPathExpr = override.SubPathExpr
+	//}
 	return merged
 }
 
