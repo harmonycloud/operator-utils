@@ -1,8 +1,6 @@
 package merge
 
 import (
-	"sort"
-
 	"github.com/harmonycloud/operator-utils/pkg/util/contains"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -211,9 +209,9 @@ func HostAliases(originalAliases, overrideAliases []corev1.HostAlias) []corev1.H
 		mergedHostAliases = append(mergedHostAliases, v)
 	}
 
-	sort.SliceStable(mergedHostAliases, func(i, j int) bool {
-		return mergedHostAliases[i].IP < mergedHostAliases[j].IP
-	})
+	//sort.SliceStable(mergedHostAliases, func(i, j int) bool {
+	//	return mergedHostAliases[i].IP < mergedHostAliases[j].IP
+	//})
 
 	return mergedHostAliases
 }
