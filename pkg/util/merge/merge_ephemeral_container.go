@@ -1,8 +1,6 @@
 package merge
 
 import (
-	"sort"
-
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -30,9 +28,9 @@ func EphemeralContainers(defaultContainers, overrideContainers []corev1.Ephemera
 		mergedContainers = append(mergedContainers, v)
 	}
 
-	sort.SliceStable(mergedContainers, func(i, j int) bool {
-		return mergedContainers[i].Name < mergedContainers[j].Name
-	})
+	//sort.SliceStable(mergedContainers, func(i, j int) bool {
+	//	return mergedContainers[i].Name < mergedContainers[j].Name
+	//})
 	return mergedContainers
 
 }
