@@ -47,33 +47,19 @@ func StringToBoolMap(map1, map2 map[string]bool) map[string]bool {
 	return mergedMap
 }
 
-// Containers merges two slices of containers merging each item by container name.
 func Containers(defaultContainers, overrideContainers []corev1.Container) []corev1.Container {
-	mergedContainerMap := map[string]corev1.Container{}
 
-	originalMap := createContainerMap(defaultContainers)
 	overrideMap := createContainerMap(overrideContainers)
 
-	for k, v := range originalMap {
-		mergedContainerMap[k] = v
-	}
-
-	for k, v := range overrideMap {
-		if orig, ok := originalMap[k]; ok {
-			mergedContainerMap[k] = Container(orig, v)
-		} else {
-			mergedContainerMap[k] = v
-		}
-	}
-
 	var mergedContainers []corev1.Container
-	for _, v := range mergedContainerMap {
+
+	for _, v := range defaultContainers {
+		if orig, ok := overrideMap[v.Name]; ok {
+			v = Container(orig, v)
+		}
 		mergedContainers = append(mergedContainers, v)
 	}
 
-	sort.SliceStable(mergedContainers, func(i, j int) bool {
-		return mergedContainers[i].Name < mergedContainers[j].Name
-	})
 	return mergedContainers
 
 }
