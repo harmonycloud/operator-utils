@@ -37,10 +37,14 @@ func UpdateServiceSelectorWithArray(conditions []map[string]interface{},
 	name string) error {
 
 	for _, condition := range conditions {
-		podType := condition[STATUS_TYPE_KEY]
-		podName := condition[STATUS_TYPE_POD]
-		status := condition[STATUS_TYPE_STATUS]
+		podType, exist1 := condition[STATUS_TYPE_KEY]
+		podName, exist2 := condition[STATUS_TYPE_POD]
+		status, _ := condition[STATUS_TYPE_STATUS]
 		statusBool := false
+		if !exist1 || !exist2  {
+			klog.Info("condition format err")
+			return nil
+		}
 
 		// 为了兼容，status可能为字符串也有可能为bool类型
 		if status != nil {
@@ -109,7 +113,7 @@ func UpdateServiceSelector(clientset clientset.Interface,
 
 		if isMatch {
 			if service.Spec.Selector[LABEL_STS_POD] != selectPodName {
-				klog.Infof("change [%s] svc selector to [%v]", name, selectPodName)
+				klog.Infof("change [%s] svc selector to [%v]", service.Name, selectPodName)
 				service.Spec.Selector[LABEL_STS_POD] = selectPodName
 				_, err := clientset.CoreV1().Services(namespace).Update(context.TODO(), &service, metav1.UpdateOptions{})
 				if err != nil {
