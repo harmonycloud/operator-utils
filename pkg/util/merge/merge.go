@@ -53,11 +53,11 @@ func Containers(defaultContainers, overrideContainers []corev1.Container) []core
 
 	var mergedContainers []corev1.Container
 
-	for _, v := range defaultContainers {
-		if orig, ok := overrideMap[v.Name]; ok {
-			v = Container(orig, v)
+	for _, orig := range defaultContainers {
+		if v, ok := overrideMap[orig.Name]; ok {
+			orig = Container(orig, v)
 		}
-		mergedContainers = append(mergedContainers, v)
+		mergedContainers = append(mergedContainers, orig)
 	}
 
 	return mergedContainers
@@ -283,31 +283,23 @@ func mergeVolumeDevice(original, override corev1.VolumeDevice) corev1.VolumeDevi
 // Envs merges two slices of EnvVars using their name as the unique
 // identifier.
 func Envs(original, override []corev1.EnvVar) []corev1.EnvVar {
-	mergedEnvsMap := map[string]corev1.EnvVar{}
 
-	originalMap := createEnvMap(original)
+	//originalMap := createEnvMap(original)
 	overrideMap := createEnvMap(override)
-
-	for k, v := range originalMap {
-		mergedEnvsMap[k] = v
-	}
-
-	for k, v := range overrideMap {
-		if orig, ok := originalMap[k]; ok {
-			mergedEnvsMap[k] = mergeSingleEnv(orig, v)
-		} else {
-			mergedEnvsMap[k] = v
-		}
-	}
-
 	var mergedEnvs []corev1.EnvVar
-	for _, v := range mergedEnvsMap {
-		mergedEnvs = append(mergedEnvs, v)
+
+	for _, orig := range original {
+		if v, ok := overrideMap[orig.Name]; ok {
+			if v.Value != "" {
+				orig.Value = v.Value
+			}
+			if v.ValueFrom != nil {
+				orig.ValueFrom = v.ValueFrom
+			}
+		}
+		mergedEnvs = append(mergedEnvs, orig)
 	}
 
-	sort.SliceStable(mergedEnvs, func(i, j int) bool {
-		return mergedEnvs[i].Name < mergedEnvs[j].Name
-	})
 	return mergedEnvs
 }
 
@@ -408,30 +400,22 @@ func createContainerPortMap(containerPorts []corev1.ContainerPort) map[string]co
 
 // VolumeMounts merges two slices of volume mounts by name.
 func VolumeMounts(original, override []corev1.VolumeMount) []corev1.VolumeMount {
-	mergedMountsMap := map[string]corev1.VolumeMount{}
-	originalMounts := createVolumeMountMap(original)
-	overrideMounts := createVolumeMountMap(override)
 
-	for k, v := range originalMounts {
-		mergedMountsMap[k] = v
-	}
-
-	for k, v := range overrideMounts {
-		if orig, ok := originalMounts[k]; ok {
-			mergedMountsMap[k] = VolumeMount(orig, v)
-		} else {
-			mergedMountsMap[k] = v
-		}
-	}
+	overrideMap := createVolumeMountMap(override)
 
 	var mergedMounts []corev1.VolumeMount
-	for _, mount := range mergedMountsMap {
-		mergedMounts = append(mergedMounts, mount)
-	}
 
-	sort.SliceStable(mergedMounts, func(i, j int) bool {
-		return volumeMountToString(mergedMounts[i]) < volumeMountToString(mergedMounts[j])
-	})
+	for _, orig := range original {
+		if v, ok := overrideMap[orig.Name]; ok {
+			if v.MountPath != "" {
+				orig.MountPath = v.MountPath
+			}
+			if v.SubPath != "" {
+				orig.SubPath = v.SubPath
+			}
+		}
+		mergedMounts = append(mergedMounts, orig)
+	}
 
 	return mergedMounts
 }
