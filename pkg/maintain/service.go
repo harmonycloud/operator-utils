@@ -2,6 +2,7 @@ package maintain
 
 import (
 	"context"
+	"github.com/harmonycloud/operator-utils/pkg/util"
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
@@ -12,16 +13,17 @@ import (
 )
 
 const (
-	LABEL_MIDD        = "middleware.harmonycloud.cn/app-name"
-	LABEL_AUTO_CHANGE = "middleware.harmonycloud.cn/service-autochange"
-	// 比如master、slave等
-	LABEL_TYPE    = "middleware.harmonycloud.cn/service-type"
 	LABEL_STS_POD = "statefulset.kubernetes.io/pod-name"
 	LABEL_APP     = "app"
 
 	STATUS_TYPE_KEY    = "type"
 	STATUS_TYPE_POD    = "name"
 	STATUS_TYPE_STATUS = "status"
+)
+
+var (
+	// 比如master、slave等
+	LABEL_TYPE    = util.AdaptCompany("middleware.harmonycloud.cn/service-type")
 )
 
 /**
