@@ -12,7 +12,9 @@ func PodTemplateSpecs(original, override corev1.PodTemplateSpec) corev1.PodTempl
 
 	merged.Annotations = StringToStringMap(original.Annotations, override.Annotations)
 	merged.Labels = StringToStringMap(original.Labels, override.Labels)
-	merged.Spec.Volumes = Volumes(original.Spec.Volumes, override.Spec.Volumes)
+	if override.Spec.Volumes != nil {
+		merged.Spec.Volumes = Volumes(original.Spec.Volumes, override.Spec.Volumes)
+	}
 	merged.Spec.Containers = Containers(original.Spec.Containers, override.Spec.Containers)
 	merged.Spec.InitContainers = Containers(original.Spec.InitContainers, override.Spec.InitContainers)
 
