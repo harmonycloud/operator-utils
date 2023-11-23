@@ -138,14 +138,14 @@ func Probe(original, override *corev1.Probe) *corev1.Probe {
 		return override
 	}
 	merged := *original
-	if override.Handler.Exec != nil {
-		merged.Handler.Exec = override.Handler.Exec
+	if override.ProbeHandler.Exec != nil {
+		merged.ProbeHandler.Exec = override.ProbeHandler.Exec
 	}
-	if override.Handler.HTTPGet != nil {
-		merged.Handler.HTTPGet = override.Handler.HTTPGet
+	if override.ProbeHandler.HTTPGet != nil {
+		merged.ProbeHandler.HTTPGet = override.ProbeHandler.HTTPGet
 	}
-	if override.Handler.TCPSocket != nil {
-		merged.Handler.TCPSocket = override.Handler.TCPSocket
+	if override.ProbeHandler.TCPSocket != nil {
+		merged.ProbeHandler.TCPSocket = override.ProbeHandler.TCPSocket
 	}
 	if override.InitialDelaySeconds != 0 {
 		merged.InitialDelaySeconds = override.InitialDelaySeconds
