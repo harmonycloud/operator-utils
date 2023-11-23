@@ -47,33 +47,19 @@ func StringToBoolMap(map1, map2 map[string]bool) map[string]bool {
 	return mergedMap
 }
 
-// Containers merges two slices of containers merging each item by container name.
 func Containers(defaultContainers, overrideContainers []corev1.Container) []corev1.Container {
-	mergedContainerMap := map[string]corev1.Container{}
 
-	originalMap := createContainerMap(defaultContainers)
 	overrideMap := createContainerMap(overrideContainers)
 
-	for k, v := range originalMap {
-		mergedContainerMap[k] = v
-	}
-
-	for k, v := range overrideMap {
-		if orig, ok := originalMap[k]; ok {
-			mergedContainerMap[k] = Container(orig, v)
-		} else {
-			mergedContainerMap[k] = v
-		}
-	}
-
 	var mergedContainers []corev1.Container
-	for _, v := range mergedContainerMap {
-		mergedContainers = append(mergedContainers, v)
+
+	for _, orig := range defaultContainers {
+		if v, ok := overrideMap[orig.Name]; ok {
+			orig = Container(orig, v)
+		}
+		mergedContainers = append(mergedContainers, orig)
 	}
 
-	sort.SliceStable(mergedContainers, func(i, j int) bool {
-		return mergedContainers[i].Name < mergedContainers[j].Name
-	})
 	return mergedContainers
 
 }
@@ -152,14 +138,14 @@ func Probe(original, override *corev1.Probe) *corev1.Probe {
 		return override
 	}
 	merged := *original
-	if override.Handler.Exec != nil {
-		merged.Handler.Exec = override.Handler.Exec
+	if override.ProbeHandler.Exec != nil {
+		merged.ProbeHandler.Exec = override.ProbeHandler.Exec
 	}
-	if override.Handler.HTTPGet != nil {
-		merged.Handler.HTTPGet = override.Handler.HTTPGet
+	if override.ProbeHandler.HTTPGet != nil {
+		merged.ProbeHandler.HTTPGet = override.ProbeHandler.HTTPGet
 	}
-	if override.Handler.TCPSocket != nil {
-		merged.Handler.TCPSocket = override.Handler.TCPSocket
+	if override.ProbeHandler.TCPSocket != nil {
+		merged.ProbeHandler.TCPSocket = override.ProbeHandler.TCPSocket
 	}
 	if override.InitialDelaySeconds != 0 {
 		merged.InitialDelaySeconds = override.InitialDelaySeconds
@@ -297,31 +283,23 @@ func mergeVolumeDevice(original, override corev1.VolumeDevice) corev1.VolumeDevi
 // Envs merges two slices of EnvVars using their name as the unique
 // identifier.
 func Envs(original, override []corev1.EnvVar) []corev1.EnvVar {
-	mergedEnvsMap := map[string]corev1.EnvVar{}
 
-	originalMap := createEnvMap(original)
+	//originalMap := createEnvMap(original)
 	overrideMap := createEnvMap(override)
-
-	for k, v := range originalMap {
-		mergedEnvsMap[k] = v
-	}
-
-	for k, v := range overrideMap {
-		if orig, ok := originalMap[k]; ok {
-			mergedEnvsMap[k] = mergeSingleEnv(orig, v)
-		} else {
-			mergedEnvsMap[k] = v
-		}
-	}
-
 	var mergedEnvs []corev1.EnvVar
-	for _, v := range mergedEnvsMap {
-		mergedEnvs = append(mergedEnvs, v)
+
+	for _, orig := range original {
+		if v, ok := overrideMap[orig.Name]; ok {
+			if v.Value != "" {
+				orig.Value = v.Value
+			}
+			if v.ValueFrom != nil {
+				orig.ValueFrom = v.ValueFrom
+			}
+		}
+		mergedEnvs = append(mergedEnvs, orig)
 	}
 
-	sort.SliceStable(mergedEnvs, func(i, j int) bool {
-		return mergedEnvs[i].Name < mergedEnvs[j].Name
-	})
 	return mergedEnvs
 }
 
@@ -422,30 +400,22 @@ func createContainerPortMap(containerPorts []corev1.ContainerPort) map[string]co
 
 // VolumeMounts merges two slices of volume mounts by name.
 func VolumeMounts(original, override []corev1.VolumeMount) []corev1.VolumeMount {
-	mergedMountsMap := map[string]corev1.VolumeMount{}
-	originalMounts := createVolumeMountMap(original)
-	overrideMounts := createVolumeMountMap(override)
 
-	for k, v := range originalMounts {
-		mergedMountsMap[k] = v
-	}
-
-	for k, v := range overrideMounts {
-		if orig, ok := originalMounts[k]; ok {
-			mergedMountsMap[k] = VolumeMount(orig, v)
-		} else {
-			mergedMountsMap[k] = v
-		}
-	}
+	overrideMap := createVolumeMountMap(override)
 
 	var mergedMounts []corev1.VolumeMount
-	for _, mount := range mergedMountsMap {
-		mergedMounts = append(mergedMounts, mount)
-	}
 
-	sort.SliceStable(mergedMounts, func(i, j int) bool {
-		return volumeMountToString(mergedMounts[i]) < volumeMountToString(mergedMounts[j])
-	})
+	for _, orig := range original {
+		if v, ok := overrideMap[orig.Name]; ok {
+			if v.MountPath != "" {
+				orig.MountPath = v.MountPath
+			}
+			if v.SubPath != "" {
+				orig.SubPath = v.SubPath
+			}
+		}
+		mergedMounts = append(mergedMounts, orig)
+	}
 
 	return mergedMounts
 }
