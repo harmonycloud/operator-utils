@@ -41,3 +41,15 @@ func getWatchNamespace() (string, error) {
 	}
 	return ns, nil
 }
+
+
+const DefaultCompany = "harmonycloud"
+
+func AdaptCompany(str string) string {
+	group := os.Getenv("CRD_GROUP")
+	if group == "" {
+		return str
+	}
+	str = strings.ReplaceAll(str, DefaultCompany, group)
+	return str
+}
