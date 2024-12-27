@@ -283,8 +283,7 @@ func mergeVolumeDevice(original, override corev1.VolumeDevice) corev1.VolumeDevi
 // Envs merges two slices of EnvVars using their name as the unique
 // identifier.
 func Envs(original, override []corev1.EnvVar) []corev1.EnvVar {
-
-	//originalMap := createEnvMap(original)
+	originalMap := createEnvMap(original)
 	overrideMap := createEnvMap(override)
 	var mergedEnvs []corev1.EnvVar
 
@@ -298,6 +297,13 @@ func Envs(original, override []corev1.EnvVar) []corev1.EnvVar {
 			}
 		}
 		mergedEnvs = append(mergedEnvs, orig)
+	}
+
+	// Add new envs from override that don't exist in original
+	for _, override := range override {
+		if _, exists := originalMap[override.Name]; !exists {
+			mergedEnvs = append(mergedEnvs, override)
+		}
 	}
 
 	return mergedEnvs
@@ -400,9 +406,8 @@ func createContainerPortMap(containerPorts []corev1.ContainerPort) map[string]co
 
 // VolumeMounts merges two slices of volume mounts by name.
 func VolumeMounts(original, override []corev1.VolumeMount) []corev1.VolumeMount {
-
 	overrideMap := createVolumeMountMap(override)
-
+	originalMap := createVolumeMountMap(original)
 	var mergedMounts []corev1.VolumeMount
 
 	for _, orig := range original {
@@ -413,8 +418,24 @@ func VolumeMounts(original, override []corev1.VolumeMount) []corev1.VolumeMount 
 			if v.SubPath != "" {
 				orig.SubPath = v.SubPath
 			}
+			if v.SubPathExpr != "" {
+				orig.SubPathExpr = v.SubPathExpr
+			}
+			if v.ReadOnly {
+				orig.ReadOnly = v.ReadOnly
+			}
+			if v.MountPropagation != nil {
+				orig.MountPropagation = v.MountPropagation
+			}
 		}
 		mergedMounts = append(mergedMounts, orig)
+	}
+
+	// Add new mounts from override that don't exist in original
+	for _, override := range override {
+		if _, exists := originalMap[override.Name]; !exists {
+			mergedMounts = append(mergedMounts, override)
+		}
 	}
 
 	return mergedMounts
